@@ -1,0 +1,232 @@
+\documentclass[11pt]{article}
+
+% ====================================================
+% PACKAGES
+% ====================================================
+\usepackage[margin=1in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{setspace}
+\usepackage{parskip}
+
+\usepackage{amsmath, amssymb, mathtools}
+\usepackage{siunitx}
+
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{subcaption}
+
+\usepackage{enumitem}
+\usepackage{booktabs}
+
+\usepackage{xcolor}
+\usepackage{hyperref}
+
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+
+\usepackage{listings}
+\usepackage{indentfirst}
+\usepackage[justification=centering]{caption}
+
+% ====================================================
+% PAGE STYLE
+% ====================================================
+\onehalfspacing%
+\setlength{\parindent}{2em}
+
+\pagestyle{fancy}
+\fancyhf{}
+% Header Design
+\lhead{\Assignment\ |\ \course}
+\rhead{\Name\ |\ \today}
+\cfoot{Page \thepage\ of~\pageref{LastPage}}
+
+\usepackage{listings}
+\usepackage{xcolor}
+
+\lstset{
+    language=Matlab,
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{blue},
+    commentstyle=\color{gray},
+    stringstyle=\color{orange},
+    numbers=left,
+    numberstyle=\tiny,
+    stepnumber=1,
+    numbersep=5pt,
+    frame=single,
+    breaklines=true,
+    showstringspaces=false
+}
+
+% ====================================================
+% Assignment Info
+% ====================================================
+\newcommand{\Name}{Arael Anaya}
+\newcommand{\Assignment}{Quasi-Static Derivation of Scissor Boom Force}
+\newcommand{\course}{Senior Design}
+
+
+\lstset{
+    language=Matlab,
+    basicstyle=\ttfamily\small,
+    frame=single,
+    breaklines=true,
+    numbers=left,
+    numberstyle=\tiny,
+    tabsize=2
+}
+
+% makes the hyperlinks look good
+\hypersetup{
+    colorlinks,
+    linkcolor={red!50!black},
+    citecolor={blue!50!black},
+    urlcolor={blue!80!black}
+}
+
+
+\setlength{\parindent}{1em}
+\usepackage{indentfirst}
+
+\begin{document}
+\begin{center}
+        \includegraphics[width = .8\linewidth]
+        {figures/systemDiagram.png}
+\end{center}
+
+Assume a \textbf{quasi-static} system, i.e.\ motion is slow and inertia is 
+neglected, so the actuator only overcomes friction.
+
+Let $\theta = \text{angle between each scissor link and the horizontal.}$
+\[
+\begin{aligned}
+X(\theta) &= nL\cos\theta, &
+\quad & X = \text{horizontal deployed length} \\
+Y(\theta) &= nL\sin\theta, &
+\quad & Y = \text{vertical actuator position} \\
+\frac{dY}{d\theta} &= nL\cos\theta, &
+\quad & \text{rate of vertical motion w.r.t. }\theta
+\end{aligned}
+\]
+
+Resistance consists of hinge and rail friction. With hinge torque $\tau_h$ and $n_h$ hinges per bay,
+\[
+\tau_{\text{hinges}} = n n_h \tau_h, 
+\qquad
+\tau_{\text{rail}} = F_{\text{rail}} \frac{dY}{d\theta}.
+\]
+Thus,
+\[
+\tau_\theta = \tau_{\text{hinges}} + \tau_{\text{rail}}.
+\]
+
+Using virtual work\footnote{Since $Y$ and $\theta$ are in different
+coordinate systems, we must use virtual work and more precisely the principle
+of least action applied to energy in a static system.},
+\[
+F_{\text{act}}\,dY = \tau_\theta\,d\theta
+\;\;\Rightarrow\;\;
+F_{\text{act}} = \frac{\tau_\theta}{dY/d\theta}.
+\]
+
+\[
+\boxed{
+F_{\text{act}}(\theta)
+=
+\frac{
+n n_h \tau_h + F_{\text{rail}} (nL\cos\theta)
+}{
+nL\cos\theta
+}
+}
+\]
+This is the quasi-static actuator force required to move the scissor boom 
+at angle \(\theta\).
+
+\newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% \begin{center}
+%         \includegraphics[width = .3\linewidth]
+%         {figures/jointDiagram.png}
+% \end{center}
+
+Let $\alpha_k = \text{absolute angle of link } k,$ and
+$\theta_i = \alpha_{i+1} - \alpha_i$, where $\theta = 0$ is a fully straight joint.
+
+\[
+\alpha_k = \alpha_k(t) + \sum_{j=1}^{k-1} \theta_j,
+\quad k = 2,\dots,n
+\]
+
+\[
+\begin{aligned}
+X &= \sum_{k=1}^{n} L \cos(\alpha_k),
+&\quad & X = \text{horizontal tip position} \\[6pt]
+Y &= \sum_{k=1}^{n} L \sin(\alpha_k),
+&\quad & Y = \text{vertical tip position}
+\end{aligned}
+\]
+
+Initial folded configuration:
+\[
+\begin{aligned}
+\alpha_k(0) &= \frac{\pi}{2} + (-1)^{k-1}\phi_0,
+&\quad & \text{alternating link angles} \\[6pt]
+\theta_i(0) &= \pm 2\phi_0,
+&\quad & \text{alternating joint angles}
+\end{aligned}
+\]
+
+Model each compliant joint as a circular arc:
+\[
+R = \frac{s}{\theta},
+\qquad
+\mathbf{r} =
+\begin{bmatrix}
+R \sin\theta \\
+R(1-\cos\theta)
+\end{bmatrix}
+\qquad
+\mathbf{F}_p = pA
+\begin{bmatrix}
+\cos\theta \\
+\sin\theta
+\end{bmatrix}
+\]
+
+
+Moment about the joint base:
+\[
+M_p = \mathbf{r} \times \mathbf{F}_p \to \boxed{M_p = p A \frac{s}{\theta} (1 - \cos\theta)
+}
+\]
+
+Joint resistance is modeled as a torsional spring:
+\[
+\boxed{
+M_r = k \theta
+}
+\]
+
+Quasi-static equilibrium:
+\[
+M_p = M_r \to p A \frac{s}{\theta}(1 - \cos\theta) = k \theta
+\]
+
+\[
+\boxed{
+p(\theta) =
+\frac{k \theta^2}{A s (1 - \cos\theta)}
+}
+\]
+
+This is the quasi-static pressure required to actuate each compliant joint 
+as a function of $\theta$.
+
+
+\end{document}
