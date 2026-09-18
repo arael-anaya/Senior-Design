@@ -317,89 +317,79 @@ spring term (it is likewise a function of $\theta$ alone at fixed $\DP$):
 \end{equation}
 
 
-\section{PHASE 1}
+\section{Quasi-Static Assumption}
 
-From $\theta = \pi/2$ till the system no longer experiences the moment singularity due to kinking, we
-will rely solely on the hinged springs to generate enough force in the system. As such we have a
-simplified version of the Lagrange with no pressure force ($Q_p = Q_F = 0$):
+\subsection*{Friction as $Q_F$}
 
+The only external force is dry friction at the $N_s$ hinges, opposing $\dth<0$ (monotonic deployment):
 \begin{equation}
-\underbrace{\Big[M_j\,i(i-1)L^{2}s^{2}\theta + I_j + \tfrac{1}{2}M_j L^{2}\Big]}_{I_{\text{eff}}(\theta)}\ddth
-+ M_j\,i(i-1)L^{2}\st\ct\,\dth^{2}
-+ N_s k\theta
-= 0
-\label{eq:phase1}
+Q_F = -N_s\,\tau_f\,\mathrm{sgn}(\dth) = N_s\tau_f
 \end{equation}
 
-This diff eq can be solved using \textbf{conservation of energy (first integral of motion)}, since the
-system is scleronomic and unforced here: $H=T+V$ is conserved.
-\begin{equation}
-\tfrac{1}{2}I_{\text{eff}}(\theta)\,\dth^{2} + \tfrac{1}{2}N_s k\theta^{2} = E
-\end{equation}
+\subsection*{Justification}
 
-Assuming a desired duration of \emph{t}, starting from rest at $\theta(0)=\pi/2$, so
-$E = \tfrac{1}{2}N_s k(\pi/2)^2$:
-\begin{equation}
-\dth = -\sqrt{\frac{N_s k\big[(\pi/2)^2 - \theta^2\big]}{I_{\text{eff}}(\theta)}}
-\end{equation}
-Integrating from stowage to the Phase 1 endpoint $\theta_1$:
-\begin{equation}
-t = \frac{1}{\sqrt{N_s k}}\int_{\theta_1}^{\pi/2} \sqrt{\frac{I_{\text{eff}}(\theta)}{(\pi/2)^2-\theta^2}}\;d\theta
-\end{equation}
+The inertial terms $I_{\text{eff}}(\theta)\ddth$ and $M_j\,i(i-1)L^{2}\st\ct\,\dth^{2}$ scale with the
+deployment rate, set by $t_{\text{deploy}}\!\sim\!\SI{1}{hr}$ (Phase 1) and
+$t_{2,\text{deploy}}\!\sim\!\SI{10}{hr}$ (Phase 2). Using $\dth\sim\Delta\theta/t_{\text{phase}}$,
+$\ddth\sim\Delta\theta/t_{\text{phase}}^2$, \texttt{quasi\_static\_check.py} gives:
 
-The required spring constant (based on all known mass parameters) is:
+\begin{center}
+\begin{tabular}{lcc}
+\toprule
+ratio to & Phase 1 & Phase 2 \\
+\midrule
+friction torque ($I_{\text{eff}}\ddth$) & $5.6\times10^{-3}$ & $1.9\times10^{-4}$ \\
+friction torque (centrifugal) & $7.1\times10^{-4}$ & $2.9\times10^{-4}$ \\
+spring/kink torque ($I_{\text{eff}}\ddth$) & $4.1\times10^{-3}$ & $1.7\times10^{-3}$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+Inertial terms are $10^{3}$--$10^{4}\times$ smaller than every other torque in both phases, so they
+drop out.
+
+\subsection*{Quasi-static equation of motion}
+
+The EOM collapses from a 2nd-order ODE to an algebraic torque balance at each $\theta$:
 \begin{equation}
 \boxed{
-k = \frac{1}{N_s t^{2}}\left[\int_{\theta_1}^{\pi/2} \sqrt{\frac{I_{\text{eff}}(\theta)}{(\pi/2)^2-\theta^2}}\;d\theta\right]^{2}
+N_s k\theta + 2N_k\,\Mk(2\theta,\DP) = N_s\tau_f
+}
+\label{eq:qs}
+\end{equation}
+$t_{\text{deploy}}$, $t_{2,\text{deploy}}$ drop out with the inertial terms: \eqref{eq:qs} only checks
+that the mechanism keeps moving, not how fast.
+
+\section{PHASE 1}
+
+$\theta_0\to\theta_1$, $\Mk=0$:
+\begin{equation}
+k\theta = \tau_f
+\label{eq:phase1}
+\end{equation}
+Spring torque is weakest at $\theta_1$, so that's the binding constraint:
+\begin{equation}
+\boxed{
+k = \big(\text{spring margin}\big)\,\frac{\tau_f}{\theta_1}
 }
 \end{equation}
 
 \section{PHASE 2}
 
-Past $\theta_1$, kinking becomes reliable and the pressure generalized force $Q_p$ enters. 
+$\theta_1\to\theta_{min}$, (C1) closure $\Mk=M_{k0}$:
 \begin{equation}
-I_{\text{eff}}(\theta)\,\ddth + M_j\,i(i-1)L^{2}\st\ct\,\dth^{2} + N_s k\theta + 2N_k M_{k0} = 0
+N_s k\theta + 2N_k M_{k0} = N_s\tau_f
 \label{eq:phase2}
 \end{equation}
-where $M_{k0} \equiv M_k\big|_{C1}$ is the unknown constant kink moment to be solved for.
-
-Because $M_{k0}$ is constant, $Q_p$ is still conservative: define an actuator potential referenced to
-the Phase 1/2 boundary,
-\begin{equation}
-U_p(\theta) = 2N_k M_{k0}\,(\theta - \theta_1), \qquad U_p(\theta_1) = 0
-\end{equation}
-
-\subsection*{Boundary matching}
-
-Continuity with Phase 1 fixes the initial condition of Phase 2 at $\theta_1$:
-\begin{equation}
-\dth_1 = -\sqrt{\frac{N_s k\big[(\pi/2)^2-\theta_1^{2}\big]}{I_{\text{eff}}(\theta_1)}}
-\end{equation}
-
-\subsection*{Energy conservation}
-
-\begin{equation}
-\tfrac{1}{2}I_{\text{eff}}(\theta)\,\dth^{2} + \tfrac{1}{2}N_s k\theta^{2} + 2N_k M_{k0}(\theta-\theta_1)
-= \tfrac{1}{2}I_{\text{eff}}(\theta_1)\,\dth_1^{2} + \tfrac{1}{2}N_s k\theta_1^{2}
-\end{equation}
-
-Solving for $\dth$:
-\begin{equation}
-\dth = -\sqrt{\frac{I_{\text{eff}}(\theta_1)\dth_1^{2} + N_s k(\theta_1^{2}-\theta^{2}) - 4N_k M_{k0}(\theta-\theta_1)}{I_{\text{eff}}(\theta)}}
-\end{equation}
-
-Integrating to the full-deployment angle $\theta_{min}$, the desired Phase 2 duration $t_2$ implicitly
-determines the required kink moment:
+Binding at $\theta_{min}$:
 \begin{equation}
 \boxed{
-t_2 = \int_{\theta_{min}}^{\theta_1}
-\sqrt{\frac{I_{\text{eff}}(\theta)}{I_{\text{eff}}(\theta_1)\dth_1^{2} + N_s k(\theta_1^{2}-\theta^{2}) - 4N_k M_{k0}(\theta-\theta_1)}}\;d\theta
+M_{k0} = \big(\text{margin}\big)\,\frac{N_s\big[\tau_f - k\theta_{min}\big]}{2N_k}
 }
 \end{equation}
+then $\DP = M_{k0}/(aR^3)$ for a chosen tube radius $R$.
 
-Unlike Phase 1, this does not invert cleanly for $M_{k0}$ (it sits inside the integrand as well as
-scaling the whole bracket), so it must be solved numerically, e.g.\ root-find $M_{k0}$ so this integral equals the
-target $t_2$.
+Note: unlike the energy-based sizing this replaces, Phase 1 can no longer hand off kinetic energy into
+Phase 2 — each phase clears friction on its own, so this sizing is more conservative.
 
 % \subsection*{From $M_{k0}$ to pressure and tube geometry}
 

@@ -98,7 +98,7 @@ def solve_theta1(handoff_margin=handoff_margin):
     return (np.pi - np.arcsin(handoff_margin)) / 2.0
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  
     theta_1 = solve_theta1()
     k = required_k(theta_1, t_deploy)
 
