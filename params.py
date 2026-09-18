@@ -81,3 +81,12 @@ R_tube = 0.1                       # m, chosen inflated tube radius (design choi
 a_kink = 1.0                        # bench-test empirical constant, both closures  [PLACEHOLDER]
 
 N_M_TO_IN_LBF = 8.85074579
+
+# Set True to override every value above with testingParams.py's bench-test
+# values (flat-bar test link, small-scale panel) instead of the production
+# design. Phase1.py/Phase2.py need no changes -- they import from this module,
+# and this override runs before they do.
+USE_TESTING_PARAMS = True
+
+if USE_TESTING_PARAMS:
+    from testingParams import *
