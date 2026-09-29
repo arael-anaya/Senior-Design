@@ -7,10 +7,6 @@ import numpy as np
 n_links = 7                     # n, number of scissor links/bays
 panels_per_link = 1              # number of radiator panels carried per link
 
-# I_eff(theta) sums the per-link (1/2 - i)^2 velocity-coefficient term over every
-# link (Derivation/main.tex eq. Texp), which reduces to sum_{i=1}^{n} i(i-1) once
-# the 1/4 constant is folded in. The old code used a single placeholder link index
-# instead of this sum, understating the mechanism's total effective inertia.
 S1_link_index = n_links * (n_links + 1) * (n_links - 1) / 3.0   # sum_{i=1}^{n} i(i-1)
 
 # Material Density
@@ -40,29 +36,13 @@ I_j = I_panel + I_link  # kg*m^2, moment of inertia of one link about its own CM
 N_springs = n_links               # N, number of hinge-spring joints
 N_kinks = n_links                  # Nk, number of tube kink joints
 
-# No bench test of hinge friction was feasible before the spring buy, so rather
-# than trust the earlier flat 0.5 N guess, F_friction is set an order of
-# magnitude above it (10x) as a deliberate no-data worst case for an untested,
-# multi-joint (n_links=7) mechanism with harnessing/thermal drag that a simple
-# estimate easily misses. This makes k_min (Phase1.py) large enough that Phase 1
-# now finishes *faster* than t_deploy under any feasible spring -- that's fine,
-# finishing early carries no penalty; only finishing late (stalling) does.
+
 F_friction = 5.0                   # N, hinge friction force per joint (conservative, untested)
 tau_friction = F_friction * r_o     # N*m, resisting torque per joint (conservative, untested)
 
-# Sizing the spring against the bare nominal friction estimate left ~1% margin
-# over the minimum k that can overcome friction at all (k_min in Phase1.py) --
-# any unmodeled friction (stiction, thermal effects, harness drag, tolerance)
-# would stall deployment before reaching theta_1. Size the spring against an
-# inflated friction budget instead, so the built spring has real margin against
-# the nominal estimate above.
 friction_safety_factor = 1.5
 tau_friction_design = tau_friction * friction_safety_factor  # N*m, used for spring sizing
 
-# With F_friction this conservative, k_min already clears t_deploy faster than
-# budgeted (see required_k's fallback in Phase1.py), so the time-match no longer
-# binds. Size the spring with this much torque margin over k_min instead, so it
-# has real reserve against friction the same 5.0 N design value still underrates.
 spring_margin_over_kmin = 1.5
 
 handoff_margin = 0.5
@@ -81,3 +61,12 @@ R_tube = 0.1                       # m, chosen inflated tube radius (design choi
 a_kink = 1.0                        # bench-test empirical constant, both closures  [PLACEHOLDER]
 
 N_M_TO_IN_LBF = 8.85074579
+
+# Set True to override every value above with testingParams.py's bench-test
+# values (flat-bar test link, small-scale panel) instead of the production
+# design. Phase1.py/Phase2.py need no changes -- they import from this module,
+# and this override runs before they do.
+USE_TESTING_PARAMS = True
+
+if USE_TESTING_PARAMS:
+    from testingParams import *

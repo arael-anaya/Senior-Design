@@ -1,0 +1,135 @@
+\documentclass[11pt]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{parskip}
+\usepackage{amsmath}
+\usepackage{siunitx}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{makecell}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{xurl}
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+
+\newcommand{\Name}{Arael Anaya}
+\newcommand{\course}{Senior Design}
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{Scissor Boom Friction Table\ |\ \course}
+\rhead{\Name\ |\ \today}
+\cfoot{Page \thepage\ of~\pageref{LastPage}}
+
+\hypersetup{colorlinks, citecolor={blue!50!black}, urlcolor={blue!80!black}}
+
+\begin{document}
+
+\begin{center}
+{\Large\textbf{Friction Sources --- Paragon Deployable Radiator Scissor Boom}}
+\end{center}
+
+Each friction source is converted to a resisting torque $Q$ on the boom's deployment angle $\theta$, so the
+sources can be added together and compared with the hinge springs. Pin joints use
+\begin{equation*}
+Q_{\text{pins}} = (6n-2)\,\mu N r_{\text{pin}},
+\end{equation*}
+where $6n-2$ counts the $3n$ joints of an $n$-bay scissor. Most of these joints turn twice as far as
+$\theta$. The total is converted to the \texttt{params.py} convention with
+$F_{\text{friction}} = Q/(N_s r_o)$. Production values are for the 7-bay array on orbit, where pin loads
+come from the springs (under \SI{1}{N}). Bench values are for the 2-bay test article in 1\,g, where each
+pin carries one bay's weight (\SI{10.4}{N}).
+
+\begin{table}[h]
+\centering
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\renewcommand{\arraystretch}{1.3}
+\begin{tabularx}{\linewidth}{@{} >{\raggedright\arraybackslash}p{2.8cm} Y r r r @{}}
+\toprule
+& & \multicolumn{2}{c}{\textbf{Production, orbit}} & \textbf{Bench, 1\,g} \\
+\cmidrule(lr){3-4}\cmidrule(l){5-5}
+\textbf{Component} & \textbf{Friction value used (source)} &
+\makecell[r]{\textbf{Nom. $Q$}\\\textbf{[N\,m]}} & \makecell[r]{\textbf{Range}\\\textbf{[N\,m]}} &
+\makecell[r]{\textbf{Nom. $Q$}\\\textbf{[N\,m]}} \\
+\midrule
+Hinge pin joints &
+$\mu$ = 0.01--0.04 MoS$_2$ in vacuum~\cite{spalvins}; 0.06--0.18 polymer bushing~\cite{igus};
+0.61 bare Al--steel~\cite{etb} & 0.004 & 0.001--0.055 & 0.060 \\
+Root guide &
+$\mu$ = 0.002--0.003 ball guide~\cite{thk}; 0.47 plain slot~\cite{etb} & 0.004 & 0.002--0.59 & 0.008 \\
+Torsion springs &
+Coil/arbor rubbing $\approx$ 5.9\% of spring torque~\cite{engedge} & 0.26 & 0.13--0.51 & 0.005 \\
+Harness / flex lines &
+3.2 in-lb per hinge line measured (0.5--20 in-lb)~\cite{helfrich} & 2.89 & 0.45--18.1 & 0.36$^{*}$ \\
+Vacuum adhesion (start only) &
+0--1.74\,N per Al7075 contact~\cite{stm279} & 0.085 & 0--0.44 & -- \\
+Deployed latch (end only) &
+Steel ramp, $\mu$ = 0.42 (0.2--0.8)~\cite{etb}; \SI{5}{N} plunger assumed & 0.33 & 0.22--0.64 & 0.33 \\
+\midrule
+\textbf{System total (travel)} & & \textbf{3.16} & 0.58--19.2 & \textbf{0.43} (0.07$^{*}$) \\
+\textbf{Equiv.\ $F_{\text{friction}}$} & Current model: \SI{5}{N} (\SI{7.5}{N} with $\times1.5$) &
+\textbf{8.9\,N} & 1.6--54 & \textbf{68\,N} (11\,N$^{*}$) \\
+\textbf{ECSS design requirement} & $2\times(3\times$ each term$)$~\cite{ecss} & 18.9 & -- & 2.6 \\
+\bottomrule
+\end{tabularx}
+
+\raggedright
+$^{*}$Bench value in parentheses excludes the gas line, since a bench article may have no line crossing a
+joint. Totals exclude the start-only and end-only rows. Adding them gives \SI{3.24}{N.m} at the start and
+\SI{3.49}{N.m} at the end of travel for production.
+\end{table}
+
+\textbf{Takeaways.}
+\begin{itemize}
+    \item Harness and flex-line drag is about 90\% of the production friction, so it should be measured
+    first. With no lines crossing the hinges, the production total drops to \SI{0.26}{N.m}
+    ($F_{\text{friction}} \approx \SI{0.7}{N}$).
+    \item Replace the \SI{5}{N} placeholder with about \SI{9}{N} for production and about \SI{11}{N} for
+    the bench.
+    \item The current spring supplies \SI{3.64}{N.m} at the Phase 1 handoff angle. That clears the nominal
+    \SI{3.16}{N.m} but not the ECSS requirement of \SI{18.9}{N.m}~\cite{ecss,nasa5017}.
+\end{itemize}
+
+{\small
+\begin{thebibliography}{9}
+\setlength{\itemsep}{0pt}
+
+\bibitem{ecss} ECSS, \emph{ECSS-E-ST-33-01C Rev.\,2: Mechanisms}, 2019, Table 4-2.
+\url{https://ecss.nl/wp-content/uploads/2019/05/ECSS-E-ST-33-01C-Rev.2(1March2019).pdf}
+
+\bibitem{nasa5017} NASA, \emph{NASA-STD-5017B: Design and Development Requirements for Mechanisms}, 2022.
+\url{https://standards.nasa.gov/sites/default/files/standards/NASA/B/2022-12-06-NASA-STD-5017B-Approved.pdf}
+
+\bibitem{etb} The Engineering ToolBox, ``Friction and Friction Coefficients.''
+\url{https://www.engineeringtoolbox.com/friction-coefficients-d_778.html}
+
+\bibitem{igus} igus, ``iglide J plastic bushings: Material data.''
+\url{https://www.igus.com/plastic-bearings/resources/iglide-material-j}
+
+\bibitem{spalvins} T.~Spalvins, ``Lubrication with Sputtered MoS$_2$ Films,'' NASA TM-105292, 1991.
+\url{https://ntrs.nasa.gov/citations/19910022902}
+
+\bibitem{thk} THK, ``General Description --- Friction Coefficient,'' p.~B0-15.
+\url{https://tech.thk.com/es/products/pdf/en_b00_015.pdf}
+
+\bibitem{engedge} Engineers Edge, ``Torsion Spring Coil Deflection and Spring Rate Formulas.''
+\url{https://www.engineersedge.com/analysis/torsion_spring_coil_deflection_16436.htm}
+
+\bibitem{helfrich} D.~Helfrich and A.~Sexton, ``Lessons Learned in the Flight Qualification of the S-NPP and
+NOAA-20 Solar Array Mechanisms,'' 44th Aerospace Mechanisms Symposium, 2018.
+\url{https://ntrs.nasa.gov/citations/20180003006}
+
+\bibitem{stm279} A.~Merstallinger et al., \emph{Assessment of Cold Welding between Separable Contact
+Surfaces}, ESA STM-279, 2009.
+\url{https://esamultimedia.esa.int/multimedia/publications/STM-279/STM-279.pdf}
+
+\end{thebibliography}
+}
+
+\end{document}

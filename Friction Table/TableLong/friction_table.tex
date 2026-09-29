@@ -1,0 +1,476 @@
+\documentclass[11pt]{article}
+
+% ====================================================
+% PACKAGES
+% ====================================================
+\usepackage[margin=1in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{setspace}
+\usepackage{parskip}
+
+\usepackage{amsmath, amssymb, mathtools}
+\usepackage{siunitx}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage[justification=centering]{caption}
+
+\usepackage{enumitem}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{multirow}
+\usepackage{makecell}
+
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{xurl}
+
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+
+% ====================================================
+% Assignment Info
+% ====================================================
+\newcommand{\Name}{Arael Anaya}
+\newcommand{\Assignment}{Friction Characterization of the Scissor Boom}
+\newcommand{\course}{Senior Design}
+
+\newcommand{\dth}{\dot{\theta}}
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+
+% ====================================================
+% PAGE STYLE
+% ====================================================
+\onehalfspacing%
+
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{\Assignment\ |\ \course}
+\rhead{\Name\ |\ \today}
+\cfoot{Page \thepage\ of~\pageref{LastPage}}
+
+\hypersetup{
+    colorlinks,
+    linkcolor={red!50!black},
+    citecolor={blue!50!black},
+    urlcolor={blue!80!black}
+}
+
+
+% ====================================================
+% TITLE
+% ====================================================
+\title{Friction Sources and Resistive-Torque Budget\\
+\large Paragon Deployable Radiator --- Scissor Boom with Inflatable Kink Actuation}
+\author{\Name\\ \course}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\section{Purpose}
+
+The deployment model (\texttt{Derivation/main.tex}, \texttt{Phase1.py}, \texttt{Phase2.py}) represents
+every resistive effect with one untested placeholder in \texttt{params.py}:
+$F_{\text{friction}} = \SI{5}{N}$ per joint, applied at $r_o$ and multiplied by a
+$1.5$ safety factor. This document replaces that guess with a component-by-component list of friction and
+other parasitic resistances. Each value comes from a cited source. The list is summed into a system total
+and converted back into the model's $F_{\text{friction}}$ convention so it can be dropped into the existing
+scripts.
+
+Every number in the tables below comes from \texttt{friction\_budget.py} (this folder). That script imports
+the project's own \texttt{params.py}, \texttt{Phase1.py} and \texttt{friction\_sweep.py}. Run it once with
+\texttt{USE\_TESTING\_PARAMS = False} (production, on orbit) and once with \texttt{True} (bench article, 1\,g).
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\linewidth]{Figures/systemDiagram.png}
+    \caption{Scissor geometry: pinned at the root, root top node on a guide, $n$ bays of length $L$.}
+\end{figure}
+
+\section{Method}
+
+\subsection*{Common currency: generalized torque about $\theta$}
+
+The derivation's equation of motion carries friction as $Q_F = N_s\tau_f$, a generalized torque about
+$\theta$. Every source below is converted to that same quantity $Q$ (N\,m) by virtual work. The sources can
+then be summed and compared directly with the spring torque $N_s k\theta$.
+
+\subsection*{Joint count and rotation}
+
+One X per bay gives $3n$ revolute joints: $n$ centre pivots, $2(n-1)$ inter-bay nodes, the ground pin, and
+the pin on the guide carriage. The centre pivots and inter-bay nodes join a $+\theta$ rod to a $-\theta$
+rod, so they turn $2\,d\theta$. The ground and carriage pins turn $d\theta$. A per-joint friction torque
+$\tau_j$ therefore costs
+\begin{equation}
+Q_{\text{pins}} = \tau_j\big[2(3n-2) + 2\big] = (6n-2)\,\tau_j ,
+\qquad \tau_j = \mu N r_{\text{pin}}
+\label{eq:pins}
+\end{equation}
+which is $40\,\tau_j$ for the production array ($n=7$) and $10\,\tau_j$ for the bench article ($n=2$). This
+factor matters. The model's $N_s\tau_f$ counts only $n$ joints turning $d\theta$ each, so it under-counts
+pin friction by $(6n-2)/n \approx 5.7\times$ for $n=7$.
+
+\subsection*{Pin normal loads}
+
+\begin{itemize}[nosep]
+    \item \textbf{On orbit (production):} there is no weight, so pin loads come from the spring torque
+    reacted across a half-link: $N \approx 2k\theta_0/L$. This is evaluated at stow, where it peaks.
+    \item \textbf{Bench (1\,g):} every joint is assumed to carry one full bay's weight, $N = M_j g$. This is
+    conservative and follows the 1\,g bushing-load approach of Guzik and Benafan~\cite{guzik}.
+\end{itemize}
+
+The spring rate $k$ is the value the current pipeline produces from the \SI{5}{N} assumption, using the
+\texttt{required\_k} function in \texttt{friction\_sweep.py}: $k=\SI{0.397}{N.m/rad}$ for production and
+$k=\SI{0.0248}{N.m/rad}$ for the bench. Friction terms that depend on $k$ (pins, guide and spring losses) are
+small next to the harness term. Resizing $k$ therefore changes the nominal total by about 8\% for production
+and 16\% for the bench (Section~\ref{sec:sc}).
+
+\subsection*{Low / nominal / high}
+
+Each source is given a range. \emph{Low} is the best case the literature supports. \emph{Nominal} is the
+recommended design value for the intended hardware: self-lubricated bushings on the bench, MoS$_2$-lubricated
+joints on orbit. \emph{High} is a credible worst case, such as bare metal-on-metal static friction or the
+worst harness characterization. Each source is also tagged with its ECSS contributor class (FR friction,
+HY hysteresis, HA harness, HD adhesion) so the standard uncertainty factors can be applied~\cite{ecss}.
+
+\subsection*{Design assumptions (not yet fixed by the project)}
+
+\begin{itemize}[nosep]
+    \item Production hinge pin: \SI{12.7}{mm} (1/2\,in) diameter. The bench uses its measured 1/4\,in holes.
+    \item Production harness routing: one gas-feed line to the inflatable tube at the root, plus one
+    coolant or electrical jumper per bay, which is $n+1=8$ hinge-line crossings. The bench has the gas-feed
+    line only.
+    \item Deployed latch: one spring plunger (\SI{5}{N}, \SI{30}{\degree} ramp, \SI{25}{mm} from a centre
+    pivot). One latch is enough because the scissor has a single degree of freedom.
+\end{itemize}
+
+% ====================================================
+\section{Friction Source Table --- Production Array, On Orbit}
+\label{sec:prod}
+
+{\footnotesize\setlength{\tabcolsep}{3pt}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabularx}{\linewidth}{@{} >{\raggedright\arraybackslash}p{2.6cm} c Y Y >{\raggedright\arraybackslash}p{1.8cm} r r r @{}}
+\toprule
+\textbf{Component} & \textbf{Class} & \textbf{Friction mechanism} &
+\textbf{Coefficient / value (source)} & \textbf{Load basis} &
+\multicolumn{3}{c}{\textbf{$Q$ [N\,m]}} \\
+\cmidrule(l){6-8}
+& & & & & Low & Nom. & High \\
+\midrule
+\makecell[tl]{Hinge pin joints\\($3n=21$)} & FR &
+Journal sliding of pin in link bore; eq.~\eqref{eq:pins} &
+$\mu$ = 0.01--0.04 sputtered MoS$_2$ in vacuum~\cite{spalvins};
+0.61 bare Al--mild steel static~\cite{etb-friction} &
+$N=2k\theta_0/L=\SI{0.356}{N}$ &
+0.000904 & 0.00361 & 0.0551 \\
+\makecell[tl]{Root guide /\\carriage (1)} & FR &
+Sliding or rolling of the root top node along its guide; $Q=\mu N L$ &
+$\mu$ = 0.002--0.003 ball-type LM guide~\cite{thk};
+0.47 plain Al--steel slot, kinetic~\cite{etb-friction} &
+same as pins &
+0.00249 & 0.00374 & 0.586 \\
+\makecell[tl]{Torsion springs\\($N_s=7$)} & HY &
+Coil-to-coil and coil-to-arbor rubbing (hysteresis) &
+5.9\% of spring torque, from the 10.2$\to$10.8 friction correction~\cite{engedge};
+low/high $=0.5\times/2\times$. Coil spacing reduces it~\cite{leespring} &
+$N_s k\theta_0=\SI{4.36}{N.m}$ &
+0.128 & 0.257 & 0.513 \\
+\makecell[tl]{Harness / flex\\lines (8 crossings)} & HA &
+Bending and set of wires, hoses and gas line across each hinge line &
+0.5 in-lb predicted, 3.2 in-lb measured, 20 in-lb worst ``zero-neutral'' per hinge line
+(S-NPP array)~\cite{helfrich} &
+per crossing &
+0.452 & 2.89 & 18.1 \\
+\makecell[tl]{Vacuum adhesion\\(breakaway only)} & HD &
+Cold-welding adhesion at metal contacts after stowage in vacuum &
+0 hard-anodised Al7075/SS; \SI{336}{mN} Alodine Al7075/Al7075;
+\SI{1744}{mN} bare Al7075/Al7075~\cite{stm279} &
+per contact, at $r_{\text{pin}}$ &
+0 & 0.0853 & 0.443 \\
+\makecell[tl]{Deployed latch\\(end of travel only)} & FR &
+Plunger riding up the latch ramp;
+$F_t = F_p\frac{\tan\alpha+\mu}{1-\mu\tan\alpha}$ &
+$\mu$ = 0.42 steel--steel kinetic, 0.8 static~\cite{etb-friction};
+latch geometry assumed &
+$F_p=\SI{5}{N}$, $r=\SI{25}{mm}$ &
+0.220 & 0.329 & 0.640 \\
+\makecell[tl]{Inflatable kink tube} & -- &
+Membrane rubbing on links, fold hysteresis &
+Not quantified separately. Already inside the measured net $a_{\text{kink}}$ (Sec.~\ref{sec:unq}) &
+-- & -- & -- & -- \\
+\makecell[tl]{Hold-down / release} & -- &
+Pin or bolt release friction &
+Acts \emph{before} motion; sized with the release device's own margin &
+-- & -- & -- & -- \\
+\bottomrule
+\end{tabularx}
+}
+
+\vspace{0.6em}
+\textbf{Reading the table.} On orbit the harness and flex lines make up about 90\% of the nominal budget.
+Pin-joint friction is almost negligible, because weightless pin loads are under \SI{1}{N} and the
+lubricated $\mu$ is small. That changes only if the joints are bare metal or bind (see the thermal note in
+Sec.~\ref{sec:unq}).
+
+% ====================================================
+\section{Friction Source Table --- Bench Test Article, 1\,g}
+\label{sec:bench}
+
+Same method with \texttt{testingParams.py}: $n=2$, $L=\SI{10}{in}$, 1/4\,in pins,
+$M_j=\SI{1.062}{kg}$, $k=\SI{0.0248}{N.m/rad}$. Vacuum adhesion does not apply in air.
+
+{\footnotesize\setlength{\tabcolsep}{3pt}
+\renewcommand{\arraystretch}{1.2}
+\begin{tabularx}{\linewidth}{@{} >{\raggedright\arraybackslash}p{2.6cm} c Y Y >{\raggedright\arraybackslash}p{1.8cm} r r r @{}}
+\toprule
+\textbf{Component} & \textbf{Class} & \textbf{Friction mechanism} &
+\textbf{Coefficient / value (source)} & \textbf{Load basis} &
+\multicolumn{3}{c}{\textbf{$Q$ [N\,m]}} \\
+\cmidrule(l){6-8}
+& & & & & Low & Nom. & High \\
+\midrule
+\makecell[tl]{Hinge pin joints\\($3n=6$)} & FR &
+Journal sliding; eq.~\eqref{eq:pins}, multiplier 10 &
+$\mu$ = 0.06--0.18 iglide J dry vs steel~\cite{igus};
+0.61 bare Al--mild steel static~\cite{etb-friction} &
+$N=M_j g=\SI{10.4}{N}$ &
+0.0198 & 0.0595 & 0.202 \\
+\makecell[tl]{Root guide /\\carriage (1)} & FR &
+Guide at the root top node &
+$\mu$ = 0.002--0.003 LM guide~\cite{thk}; 0.47 plain slot~\cite{etb-friction} &
+$N=M_j g$ &
+0.00529 & 0.00793 & 1.24 \\
+\makecell[tl]{Torsion springs\\($N_s=2$)} & HY &
+Coil / arbor rubbing &
+5.9\%~\cite{engedge}; $0.5\times$/$2\times$ &
+$N_s k\theta_0=\SI{0.078}{N.m}$ &
+0.00229 & 0.00458 & 0.00917 \\
+\makecell[tl]{Gas-feed line\\(1 crossing, if routed\\across a joint)} & HA &
+Hose bending across the root hinge &
+S-NPP per-hinge-line values~\cite{helfrich}; likely high for a small bench tube &
+per crossing &
+0.0565 & 0.362 & 2.26 \\
+\makecell[tl]{Deployed latch\\(end of travel only)} & FR &
+Plunger on ramp &
+As production~\cite{etb-friction} &
+$F_p=\SI{5}{N}$ &
+0.220 & 0.329 & 0.640 \\
+\bottomrule
+\end{tabularx}
+}
+
+\vspace{0.6em}
+\textbf{Reading the table.} In 1\,g the pin joints carry the panel weight, so pin friction is about
+$16\times$ larger than on orbit. Any line crossing a bench joint, and the latch, would outweigh everything
+else. Both should be measured directly on the bench rather than taken from flight literature.
+
+% ====================================================
+\section{System Friction Estimate}
+\label{sec:sys}
+
+Adhesion acts only at breakaway ($\theta_0$) and the latch acts only at the end of travel
+($\theta_{\min}$), so the totals are split by where in the stroke they apply. The ECSS column applies
+Table~4-2 of ECSS-E-ST-33-01C Rev.\,2: theoretical factor 3 on FR, HY, HA and HD, then the overall factor
+of 2 in its minimum-actuation equation~\cite{ecss}:
+\begin{equation}
+T_{\min} = 2\,\big(3\,\text{FR} + 3\,\text{HY} + 3\,\text{HA} + 3\,\text{HD}\big).
+\end{equation}
+NASA-STD-5017B applies the same factor, $\text{FS}_v = 3.00$ on variable (friction and harness) torques from
+analysis, in its torque-margin equation 4-1~\cite{nasa5017}.
+
+The equivalent model inputs are $\tau_f = Q/N_s$ and $F_{\text{friction}} = \tau_f/r_o$, in the same
+convention as \texttt{params.py}. The tip force is the same $Q$ seen as an axial push at the boom tip at
+$\theta_1=\SI{75}{\degree}$: $F=Q/(nL\sin\theta_1)$.
+
+\begin{table}[H]
+\centering
+\small
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{@{} l l r r r r r r @{}}
+\toprule
+& & \multicolumn{3}{c}{\textbf{Raw $Q$ [N\,m]}} & \multicolumn{3}{c}{\textbf{ECSS-factored $Q$ [N\,m]}} \\
+\cmidrule(lr){3-5}\cmidrule(l){6-8}
+\textbf{Case} & \textbf{Stroke point} & Low & Nom. & High & Low & Nom. & High \\
+\midrule
+\multirow{3}{*}{\makecell[tl]{Production,\\orbit}}
+ & Start ($\theta_0$) & 0.584 & 3.24 & 19.7 & 3.50 & 19.5 & 118 \\
+ & Travel             & 0.584 & 3.16 & 19.2 & 3.50 & 18.9 & 115 \\
+ & End ($\theta_{\min}$) & 0.803 & 3.49 & 19.9 & 4.82 & 20.9 & 119 \\
+\midrule
+\multirow{2}{*}{\makecell[tl]{Production, no lines\\across hinges}}
+ & Travel & 0.132 & 0.264 & 1.15 & 0.791 & 1.58 & 6.92 \\
+ & & & & & & & \\
+\midrule
+\multirow{2}{*}{\makecell[tl]{Bench, 1\,g}}
+ & Travel, with gas line & 0.0839 & 0.434 & 3.71 & 0.503 & 2.60 & 22.3 \\
+ & Travel, no line       & 0.0274 & 0.0720 & 1.45 & 0.165 & 0.432 & 8.72 \\
+\bottomrule
+\end{tabular}
+\caption{System resistive torque. ``No lines'' rows drop the harness/flex-line term, which is the one
+architecture choice that controls the total.}
+\end{table}
+
+\begin{table}[H]
+\centering
+\small
+\renewcommand{\arraystretch}{1.2}
+\begin{tabular}{@{} l r r r r l @{}}
+\toprule
+& & \multicolumn{3}{c}{\textbf{$F_{\text{friction}}$ [N]}} & \\
+\cmidrule(lr){3-5}
+\textbf{Case (travel)} & \textbf{$\tau_f$ nom. [N\,m]} & Low & Nom. & High & \textbf{Current model} \\
+\midrule
+Production, with lines & 0.451 & 1.64 & 8.88 & 54.1 & \SI{5}{N} (\SI{7.5}{N} with $\times1.5$) \\
+Production, no lines   & 0.0377 & 0.37 & 0.74 & 3.23 & \SI{5}{N} (\SI{7.5}{N}) \\
+Bench, with gas line   & 0.217 & 13.2 & 68.3 & 585 & \SI{5}{N} (\SI{7.5}{N}) \\
+Bench, no line         & 0.0360 & 4.32 & 11.3 & 229 & \SI{5}{N} (\SI{7.5}{N}) \\
+\midrule
+\multicolumn{6}{@{}p{0.9\linewidth}}{Tip force at $\theta_1$ (low / nom. / high): production with lines
+0.025 / 0.13 / 0.81\,N; bench 0.17 / 0.88 / 7.6\,N with line, 0.06 / 0.16 / 3.2\,N without.} \\
+\bottomrule
+\end{tabular}
+\caption{Friction expressed in the \texttt{params.py} convention ($F_{\text{friction}}=\tau_f/r_o$). Note
+$r_o=\SI{50.8}{mm}$ for production and \SI{3.175}{mm} for the bench, so the bench $F$ values are large only
+because its moment arm is small.}
+\end{table}
+
+\subsection*{Final estimate}
+
+\begin{center}
+\fbox{\parbox{0.92\linewidth}{
+\textbf{Production, on orbit:} nominal $Q \approx \SI{3.2}{N.m}$ (range 0.6--20), which is
+$F_{\text{friction}} \approx \SI{9}{N}$ in the model's convention. About 90\% of that is harness and
+flex-line drag. With no lines crossing the hinges, nominal $Q \approx \SI{0.26}{N.m}$
+($F_{\text{friction}} \approx \SI{0.7}{N}$).\\[4pt]
+\textbf{Bench, 1\,g, no line across the joints:} nominal $Q \approx \SI{0.072}{N.m}$
+($F_{\text{friction}} \approx \SI{11}{N}$), rising to about \SI{0.40}{N.m} at the latch.}}
+\end{center}
+
+\subsection*{Check against the current spring}
+
+\begin{itemize}[nosep]
+    \item \textbf{Production.} At the current $k$, all springs together provide \SI{4.36}{N.m} at stow
+    and \SI{3.64}{N.m} at $\theta_1$. The model budgets $N_s\tau_{f,\text{design}}=\SI{2.67}{N.m}$. The
+    nominal estimate with lines is \SI{3.16}{N.m}, above the model's budget and only 15\% below the
+    available spring torque at $\theta_1$. The spring still clears the \emph{raw} nominal friction. It does
+    \textbf{not} clear the ECSS-factored requirement of about \SI{19.5}{N.m}, a shortfall of about
+    $4.5\times$. If the harness and friction are measured, the factor drops from 3 to 1.5~\cite{ecss} and the
+    requirement falls to about \SI{9.7}{N.m}, still $2.2\times$ the current spring.
+    \item \textbf{Bench.} The spring from the \SI{5}{N} assumption gives \SI{0.065}{N.m} at $\theta_1$. The
+    nominal no-line friction is \SI{0.072}{N.m}, so with the conservative 1\,g pin loads the bench article
+    is at or below zero margin. The \SI{5}{N} (\SI{7.5}{N} factored) placeholder is too low for the bench;
+    about \SI{11}{N} nominal is supported.
+\end{itemize}
+
+\subsection*{Self-consistent spring sizing}
+\label{sec:sc}
+Pin, guide and spring losses scale with $k$. Resizing the spring with the model's own rule
+($\times1.5$ on the nominal start budget) and iterating to convergence gives $k=\SI{0.781}{N.m/rad}$ for
+production. The nominal equivalent then settles at $F_{\text{friction}} \approx \SI{9.8}{N}$ (start), close to
+the \SI{9.1}{N} above, because the harness term does not depend on $k$.
+
+\section{Items Not Summed}
+\label{sec:unq}
+
+\begin{itemize}
+    \item \textbf{Inflatable kink tube.} Membrane-on-link rubbing and fold hysteresis are real resistances.
+    However, the Phase 2 model uses a \emph{net} kink moment $M_k=a\,\Delta P R^3$ with $a$ measured on the
+    bench. Anything the tube loses to friction is already inside that measured $a$, so adding it here would
+    count it twice. The single-kink bench test should therefore run the tube against representative link
+    material.
+    \item \textbf{Thermal clearance loss.} Aluminium (\SI{23e-6}{/K}) shrinks faster than carbon steel
+    (10.8--\SI{12.5e-6}{/K})~\cite{etb-cte}. A steel pin in an Al bore therefore loses clearance when cold:
+    \SI{7.7}{\micro m} on the 1/4\,in bench pin and \SI{15.5}{\micro m} on a 1/2\,in production pin for a
+    \SI{100}{K} drop. Guzik and Benafan found the cold case, with a \SI{0.0076}{mm} pin gap, to be critical
+    for their hinge~\cite{guzik}. This is a binding risk rather than a friction value. Set the minimum
+    room-temperature clearance above the cold-case loss.
+    \item \textbf{Hold-down and release.} Pin-puller or bolt friction acts before deployment starts and
+    belongs to the release device's own force margin~\cite{guzik}.
+    \item \textbf{Inertia.} This is not friction, and it is already shown to be negligible by the
+    quasi-static check in the derivation.
+\end{itemize}
+
+\section{Recommendations}
+
+\begin{enumerate}[nosep]
+    \item Replace $F_{\text{friction}}=\SI{5}{N}$ in \texttt{params.py} with about \SI{9}{N} (production,
+    lines crossing each bay) or about \SI{11}{N} (bench). Keep the $\times1.5$ factor until test data exist.
+    \item Harness and flex-line drag decides the production budget. Route lines along the tube or through a
+    single root crossing where possible, and measure the torque per crossing early. Measuring it also lets
+    ECSS drop its factor from 3 to 1.5.
+    \item Use a self-lubricating or MoS$_2$-coated pin interface with dissimilar or hard-anodised surfaces.
+    Bare Al7075 against Al7075 gives the highest vacuum adhesion measured in~\cite{stm279}, and hard
+    anodising prevents it.
+    \item Use a ball-type guide at the root node. A plain slot moves the guide from about 0.1\% to 5\% of the
+    production budget, and to about half of the bench budget in the high case.
+    \item Measure the latch engagement torque on hardware. Guzik and Benafan report that analytical latch
+    friction estimates did not match test data~\cite{guzik}.
+\end{enumerate}
+
+% ====================================================
+\begin{thebibliography}{99}
+\small
+
+\bibitem{ecss}
+ECSS Secretariat, \emph{ECSS-E-ST-33-01C Rev.\,2: Space Engineering --- Mechanisms}, ESA-ESTEC,
+1~March~2019. Clause 4.7.5.3.1 and Table~4-2.
+\url{https://ecss.nl/wp-content/uploads/2019/05/ECSS-E-ST-33-01C-Rev.2(1March2019).pdf}
+
+\bibitem{nasa5017}
+NASA, \emph{NASA-STD-5017B: Design and Development Requirements for Mechanisms}, approved 2022-12-06.
+Section 4.3, Equation 4-1 and Table~1.
+\url{https://standards.nasa.gov/sites/default/files/standards/NASA/B/2022-12-06-NASA-STD-5017B-Approved.pdf}
+
+\bibitem{etb-friction}
+The Engineering ToolBox, ``Friction and Friction Coefficients for Various Materials.''
+\url{https://www.engineeringtoolbox.com/friction-coefficients-d_778.html}
+
+\bibitem{igus}
+igus GmbH, ``iglide J plastic bushings: Material data.''
+\url{https://www.igus.com/plastic-bearings/resources/iglide-material-j}
+
+\bibitem{spalvins}
+T.~Spalvins, ``Lubrication with Sputtered MoS$_2$ Films: Principles, Operation, Limitations,''
+NASA TM-105292, Lewis Research Center, 1991.
+\url{https://ntrs.nasa.gov/citations/19910022902}
+
+\bibitem{thk}
+THK Co., Ltd., ``General Description --- Friction Coefficient,'' General Catalog, p.~B0-15, Table~4.
+\url{https://tech.thk.com/es/products/pdf/en_b00_015.pdf}
+
+\bibitem{engedge}
+Engineers Edge, ``Torsion Spring Coil Deflection and Spring Rate Formulas.''
+\url{https://www.engineersedge.com/analysis/torsion_spring_coil_deflection_16436.htm}
+
+\bibitem{leespring}
+Lee Spring, ``Learn About Torsion Springs.''
+\url{https://www.leespring.com/learn-about-torsion-springs}
+
+\bibitem{helfrich}
+D.~Helfrich and A.~Sexton, ``Lessons Learned in the Flight Qualification of the S-NPP and NOAA-20 Solar
+Array Mechanisms,'' \emph{Proc.\ 44th Aerospace Mechanisms Symposium}, NASA GRC, 2018.
+\url{https://ntrs.nasa.gov/citations/20180003006}
+
+\bibitem{stm279}
+A.~Merstallinger, M.~Sales, E.~Semerad and B.\,D.~Dunn, \emph{Assessment of Cold Welding between
+Separable Contact Surfaces due to Impact and Fretting under Vacuum}, ESA STM-279, November 2009.
+\url{https://esamultimedia.esa.int/multimedia/publications/STM-279/STM-279.pdf}
+
+\bibitem{guzik}
+A.\,T.~Guzik and O.~Benafan, ``Design and Development of CubeSat Solar Array Deployment Mechanisms Using
+Shape Memory Alloys,'' NASA/TM-2018-219914, Glenn Research Center, June 2018.
+\url{https://ntrs.nasa.gov/citations/20180004164}
+
+\bibitem{etb-cte}
+The Engineering ToolBox, ``Thermal Expansion --- Linear Expansion Coefficients.''
+\url{https://www.engineeringtoolbox.com/linear-expansion-coefficients-d_95.html}
+
+\end{thebibliography}
+
+\noindent\footnotesize All links were checked (HTTP 200) and the quoted values were read from each source on
+29~September~2026.
+
+\end{document}
