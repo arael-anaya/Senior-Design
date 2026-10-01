@@ -16,7 +16,7 @@ n_links = 2                     # n, number of scissor links/bays
 panels_per_link = 1              # number of radiator panels carried per link
 
 # I_eff(theta) sums the per-link (1/2 - i)^2 velocity-coefficient term over every
-# link (Derivation/main.tex eq. Texp), which reduces to sum_{i=1}^{n} i(i-1) once
+# link (derivation/main.tex eq. Texp), which reduces to sum_{i=1}^{n} i(i-1) once
 # the 1/4 constant is folded in.
 S1_link_index = n_links * (n_links + 1) * (n_links - 1) / 3.0   # sum_{i=1}^{n} i(i-1)
 

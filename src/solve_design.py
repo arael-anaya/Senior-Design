@@ -7,7 +7,7 @@ solve for: theta_1 and k come out of Phase 1 alone, then feed forward into
 Phase 2, which solves for the kink moment -- and the pressure it implies
 for a chosen R_tube -- needed to hit the Phase 2 duration target.
 
-Derivation: Derivation/main.tex.
+Derivation: derivation/main.tex.
 """
 
 import numpy as np

@@ -1,6 +1,6 @@
 """
 Numerical check supporting the quasi-static assumption used in
-Derivation/main.tex (Section "Quasi-Static Assumption").
+derivation/main.tex (Section "Quasi-Static Assumption").
 
 Claim being checked: over the deployment timescales in params.py
 (t_deploy ~ 1 hr for Phase 1, t2_deploy ~ 11 hr for Phase 2), the inertial

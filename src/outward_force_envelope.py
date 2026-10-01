@@ -2,7 +2,7 @@
 Outward (x-direction) force the deploying array pushes with, vs. deployment
 angle -- the load a stowed-envelope locking mechanism must hold.
 
-Kinematics (Derivation/main.tex, eq. ri): each of the n links advances the
+Kinematics (derivation/main.tex, eq. ri): each of the n links advances the
 array end by L*cos(theta), so the end position is
     x_end(theta) = n * L * cos(theta),   dx/dtheta = -n * L * sin(theta).
 

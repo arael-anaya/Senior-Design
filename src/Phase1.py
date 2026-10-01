@@ -27,7 +27,7 @@ Sizing against the nominal value alone left only ~1% margin over the minimum
 k that can overcome friction at all -- any unmodeled friction source would
 have stalled deployment before reaching theta_1.
 
-Derivation: Derivation/main.tex, Section "PHASE 1" and "Closure forms".
+Derivation: derivation/main.tex, Section "PHASE 1" and "Closure forms".
 """
 
 import numpy as np

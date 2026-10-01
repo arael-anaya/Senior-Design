@@ -1,6 +1,6 @@
 """
 Deployment-time study: how slow must deployment be before the inertial terms
-in the equation of motion (Derivation/main.tex) can be dropped?
+in the equation of motion (derivation/main.tex) can be dropped?
 
 Full EOM (1-DOF, generalized coordinate theta):
     I_eff(theta)*ddtheta + M_j*S1*L^2*sin*cos*dtheta^2 + N_s*k*theta
@@ -26,7 +26,7 @@ import numpy as np
 from scipy.integrate import solve_ivp
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-CODE = os.path.dirname(HERE)
+CODE = os.path.join(os.path.dirname(os.path.dirname(HERE)), "src")
 sys.path.insert(0, CODE)
 
 # Min-jerk profile theta(t) = th0 + dth*(10s^3 - 15s^4 + 6s^5), s = t/T:

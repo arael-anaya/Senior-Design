@@ -3,7 +3,7 @@ Friction budget for the scissor-boom deployable radiator.
 
 Backs every number in friction_table.tex. Each resistive source is turned into
 a generalized torque Q about the model coordinate theta (the same slot as
-Q_F = N_s * tau_f in Derivation/main.tex), so the sources can be summed and
+Q_F = N_s * tau_f in derivation/main.tex), so the sources can be summed and
 compared directly with the spring. The total is then converted back into the
 params.py convention (tau_f per spring, F_friction = tau_f / r_o) so it drops
 straight into the existing Phase 1 / Phase 2 scripts.
@@ -28,7 +28,7 @@ import sys
 
 import numpy as np
 
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "src"))
 
 import Phase1          # noqa: E402
 import friction_sweep  # noqa: E402

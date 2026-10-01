@@ -14,7 +14,7 @@ below take them as arguments rather than assuming one fixed value. Running
 this file directly does a single pass using Phase 1's defaults, as a sanity
 check -- solve_design.py chains Phase 1 into Phase 2 end to end.
 
-Derivation: Derivation/main.tex, Section "PHASE 2".
+Derivation: derivation/main.tex, Section "PHASE 2".
 Reuses I_eff(theta), N_springs, N_kinks, and a_kink from Phase1.py.
 """
 
