@@ -1,0 +1,224 @@
+\documentclass[11pt]{article}
+
+% ====================================================
+% PACKAGES
+% ====================================================
+\usepackage[margin=1in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{setspace}
+\usepackage{parskip}
+
+\usepackage{amsmath, amssymb, mathtools}
+\usepackage{siunitx}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage[justification=centering]{caption}
+
+\usepackage{enumitem}
+\usepackage{booktabs}
+
+\usepackage{xcolor}
+\usepackage{hyperref}
+
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+\usepackage{indentfirst}
+
+% ====================================================
+% Assignment Info
+% ====================================================
+\newcommand{\Name}{Arael Anaya}
+\newcommand{\Assignment}{Friction Force to Coefficient of Friction}
+\newcommand{\course}{Senior Design}
+
+% ====================================================
+% MATH SHORTHAND
+% ====================================================
+\newcommand{\dth}{\dot{\theta}}
+\newcommand{\tauf}{\tau_f}
+\newcommand{\Nc}{N_c}      % axial clamp load from the nut
+\newcommand{\Rp}{R_p}      % radial pin reaction
+
+% ====================================================
+% PAGE STYLE
+% ====================================================
+\onehalfspacing%
+\setlength{\parindent}{2em}
+
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{\Assignment\ |\ \course}
+\rhead{\Name\ |\ \today}
+\cfoot{Page \thepage\ of~\pageref{LastPage}}
+
+\hypersetup{
+    colorlinks,
+    linkcolor={red!50!black},
+    citecolor={blue!50!black},
+    urlcolor={blue!80!black}
+}
+
+% ====================================================
+% TITLE
+% ====================================================
+\title{Recovering the Hinge Coefficient of Friction\\
+\large from a Measured Total Friction Force}
+\author{\Name\\ \course}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\noindent
+Notation follows the scissor-boom derivation: $\theta$ is the fold angle (the single generalized
+coordinate), $N_s$ is the number of hinge-spring joints, and $\tauf$ is the per-joint friction
+torque. The equation of motion treats friction only as a lumped constant torque,
+$Q_F = N_s\tauf$, so the model never defines a normal force. This note builds the missing link: it
+converts a measured total friction force into a per-joint torque and then into a coefficient of
+friction $\mu$.
+
+\section{Why the Normal Force Is Not Obvious}
+
+The Lagrangian contains only moments at the joints: the hinge-spring moment $k\theta$, the kink
+moment $M_k$, and friction $\tauf$. There is no gravity and no external force on orbit. A pure
+moment transmits no force through a pin, so in the idealized model the pin carries essentially no
+radial reaction. The normal force that produces friction therefore comes from two sources:
+\begin{enumerate}[label=(\roman*)]
+    \item \textbf{Fastener clamp} $\Nc$: the preload from the locknut, loaded through the nylon
+    washers and the shoulder screw. This is present even with no applied load.
+    \item \textbf{Radial pin reaction} $\Rp$: from real loads (weight in the 1-g test rig, tube end
+    forces, neighbouring link forces). It is zero in the on-orbit idealization.
+\end{enumerate}
+
+\section{From Total Friction to Per-Joint Torque}
+
+\subsection*{Measured quantity}
+
+A force gauge reading $F$ acting perpendicular to the moving panel at lever arm $\ell$ from the
+hinge gives the measured total friction generalized torque about $\theta$:
+\begin{equation}
+Q_{F,\text{meas}} = F\,\ell
+\end{equation}
+
+\subsection*{Virtual work over the joints}
+
+Joint $j$ has relative rotation $\varphi_j = c_j\,\theta$. For a scissor, an end pin rotates by
+$\theta$ ($c_j = 1$) and a center pin by $2\theta$ ($c_j = 2$). With friction opposing $\dth<0$,
+the virtual work of the joint friction torques is
+\begin{equation}
+\delta W_F = \sum_j \tau_j\, \delta\varphi_j
+= \Big(\sum_j c_j\,\tau_j\Big)\delta\theta
+\quad\Longrightarrow\quad
+Q_F = \sum_j c_j\,\tau_j
+\label{eq:QFsum}
+\end{equation}
+Assuming every joint has the same friction torque $\tauf$:
+\begin{equation}
+\boxed{\tauf = \frac{Q_{F,\text{meas}}}{\sum_j c_j}}
+\label{eq:tauf}
+\end{equation}
+The existing model sets $c_j=1$ for all $N_s$ joints, so $\sum_j c_j = N_s$ and
+$\tauf = Q_F/N_s$. If center pins are counted with $c_j=2$, use the sum in \eqref{eq:tauf}.
+
+\section{Friction Torque Model for One Joint}
+
+\subsection*{Pin (journal) contribution}
+
+The friction torque on a pin of radius $r_p$ carrying radial reaction $\Rp$ is
+\begin{equation}
+\tau_{\text{pin}} = \mu\,\Rp\,r_p
+\label{eq:pin}
+\end{equation}
+
+\subsection*{Washer-face contribution}
+
+The nut clamps the nylon washers axially with load $\Nc$. For uniform contact pressure on an
+annulus with inner radius $r_i$ and outer radius $r_o$, the mean friction radius is
+\begin{equation}
+r_m = \frac{2}{3}\,\frac{r_o^{3}-r_i^{3}}{r_o^{2}-r_i^{2}}
+\label{eq:rm}
+\end{equation}
+and the friction torque is
+\begin{equation}
+\tau_{\text{washer}} = \mu\,\Nc\,r_m
+\label{eq:washer}
+\end{equation}
+
+\subsection*{Clamp load from nut torque}
+
+The standard torque--preload relation gives
+\begin{equation}
+\Nc = \frac{T}{K\,d}
+\label{eq:clamp}
+\end{equation}
+with $T$ the applied nut torque, $d$ the screw diameter, and $K\approx0.2$ the nut factor for dry
+steel. $K$ varies by roughly $\pm25\%$, so a load washer is preferred if $\Nc$ is needed
+accurately.
+
+\subsection*{Total per-joint friction torque}
+
+\begin{equation}
+\tauf = \mu\big(\Rp\,r_p + \Nc\,r_m\big)
+\label{eq:taufmodel}
+\end{equation}
+
+\section{Solving for $\mu$}
+
+Solving \eqref{eq:taufmodel} for the coefficient:
+\begin{equation}
+\boxed{\mu = \frac{\tauf}{\Rp\,r_p + \Nc\,r_m}}
+\label{eq:mu}
+\end{equation}
+
+\subsection*{On-orbit idealization ($\Rp\approx0$)}
+
+\begin{equation}
+\mu \approx \frac{\tauf}{\Nc\,r_m} = \frac{\tauf\,K\,d}{T\,r_m}
+\end{equation}
+
+\subsection*{1-g test rig}
+
+Obtain $\Rp$ from a free-body diagram of the link at fold angle $\theta$:
+\begin{equation}
+\Rp(\theta) = \sqrt{R_x^{2}(\theta)+R_y^{2}(\theta)}
+\end{equation}
+where $R_x$, $R_y$ come from force equilibrium including the weight share carried by that pin.
+Because $\Rp$ depends on $\theta$, evaluate \eqref{eq:mu} at each angle and report the spread.
+
+\section{Extracting $\mu$ Without Trusting the Odd $N$}
+
+Hand-tightened hardware gives an unrepeatable $\Nc$. Instead, vary the nut torque $T$ with a
+torque driver and measure breakaway torque $\tauf$ on a single joint at each setting. Substituting
+\eqref{eq:clamp} into \eqref{eq:taufmodel} gives a line in $T$:
+\begin{equation}
+\tauf = \underbrace{\frac{\mu\,r_m}{K\,d}}_{\text{slope}}\;T
+\;+\;\underbrace{\mu\,\Rp\,r_p + \tau_{0}}_{\text{intercept}}
+\label{eq:fit}
+\end{equation}
+where $\tau_0$ collects drag that does not depend on $T$ (bearing, seal, harness). A linear fit
+gives
+\begin{equation}
+\boxed{\mu = \text{slope}\cdot\frac{K\,d}{r_m}}
+\end{equation}
+The intercept is not used for $\mu$. A large intercept indicates that $T$-independent drag, not
+sliding friction at the washers, dominates the joint.
+
+\section{Feeding the Result Back Into the Model}
+
+The design model uses only the lumped $\tauf$ (\texttt{tau\_friction} in \texttt{Params.py}). Two
+corrections follow from this derivation:
+\begin{enumerate}[label=(\roman*)]
+    \item \texttt{tau\_friction = F\_friction * r\_o} uses the link tube radius $r_o=\SI{50.8}{mm}$
+    as the lever arm. Friction acts at the pin or washer radius, so the lever arm should be $r_p$
+    (or $r_m$), not $r_o$. Prefer entering the measured $\tauf$ from \eqref{eq:tauf} directly.
+    \item The spring and kink sizing,
+    \begin{equation}
+    k = (\text{spring margin})\frac{\tauf}{\theta_1},\qquad
+    M_{k0} = (\text{margin})\frac{N_s\big[\tauf - k\theta_{\min}\big]}{2N_k},
+    \end{equation}
+    then use the measured value in place of the $\SI{5}{N}$ placeholder.
+\end{enumerate}
+
+\end{document}

@@ -1,0 +1,321 @@
+\documentclass[11pt]{article}
+
+% ====================================================
+% PACKAGES
+% ====================================================
+\usepackage[margin=1in]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{microtype}
+\usepackage{setspace}
+\usepackage{parskip}
+
+\usepackage{amsmath, amssymb, mathtools}
+\usepackage{siunitx}
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage[justification=centering]{caption}
+\usepackage{subcaption}
+
+\usepackage{enumitem}
+\usepackage{booktabs}
+
+\usepackage{xcolor}
+\usepackage{hyperref}
+
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+
+\usepackage{listings}
+\usepackage{indentfirst}
+
+% ====================================================
+% Assignment Info
+% ====================================================
+\newcommand{\Name}{Arael Anaya}
+\newcommand{\Assignment}{Test Rig Data Requirements}
+\newcommand{\course}{Senior Design}
+
+% ====================================================
+% MATH SHORTHAND
+% ====================================================
+\newcommand{\st}{s\theta}
+\newcommand{\ct}{c\theta}
+\newcommand{\nh}[1]{\hat{n}_{#1}}
+\newcommand{\dth}{\dot{\theta}}
+\newcommand{\ddth}{\ddot{\theta}}
+\newcommand{\Vg}{V_g}                 % gas volume -- distinct from spring PE, V
+\newcommand{\DP}{\Delta P}
+\newcommand{\Mk}{M_k}
+
+% ====================================================
+% PAGE STYLE
+% ====================================================
+\onehalfspacing%
+\setlength{\parindent}{2em}
+
+\pagestyle{fancy}
+\fancyhf{}
+\lhead{\Assignment\ |\ \course}
+\rhead{\Name\ |\ \today}
+\cfoot{Page \thepage\ of~\pageref{LastPage}}
+
+\lstset{
+    language=Matlab,
+    basicstyle=\ttfamily\small,
+    keywordstyle=\color{blue},
+    commentstyle=\color{gray},
+    stringstyle=\color{orange},
+    numbers=left,
+    numberstyle=\tiny,
+    stepnumber=1,
+    numbersep=5pt,
+    frame=single,
+    breaklines=true,
+    tabsize=2,
+    showstringspaces=false
+}
+
+\hypersetup{
+    colorlinks,
+    linkcolor={red!50!black},
+    citecolor={blue!50!black},
+    urlcolor={blue!80!black}
+}
+
+% ====================================================
+% TITLE
+% ====================================================
+\title{Lagrangian Derivation for an $n$-Link Spring-Jointed Panel Array\\
+\large with Inflatable Kink Actuation}
+\author{\Name\\ \course}
+\date{\today}
+
+\begin{document}
+\maketitle
+\section{Purpose}
+
+The scissor-boom model (\texttt{derivation/main.tex}, \texttt{src/}) leaves several inputs as
+untested assumptions or placeholders. This document lists the data the test rig must collect to
+replace those assumptions, validate the model, and size the stowed-envelope latch. The model treats
+deployment as quasi-static: $N_s k\theta + 2N_k M_k(2\theta,\Delta P) = N_s\tau_f$.
+
+\section{Model Inputs Needing Test Data}
+
+\begin{center}
+\begin{tabular}{llll}
+\toprule
+Quantity & Current value & Status & Section \\
+\midrule
+Hinge friction $F_{friction}$ & \SI{5}{N} & untested & \ref{sec:friction} \\
+Spring rate $k$, preload & sized from friction & unverified & \ref{sec:spring} \\
+Kink constant $a_{kink}$ & 1.0 & placeholder & \ref{sec:kink} \\
+Closure form (C1 vs.\ C2) & assumed & unverified & \ref{sec:kink} \\
+Tube radius $R_{tube}$ & \SI{0.1}{m} & placeholder & \ref{sec:kink} \\
+Final angle $\theta_{min}$ & \SI{10}{\degree} & placeholder & \ref{sec:array} \\
+Outward stow force & model prediction & unverified & \ref{sec:force} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section{Required Measurements}
+
+\subsection{Hinge Friction (highest priority)}
+\label{sec:friction}
+\begin{itemize}[noitemsep]
+    \item Breakaway (stiction) torque per hinge at stow ($\theta=\SI{90}{\degree}$).
+    \item Running torque per hinge versus $\theta$, \SI{90}{\degree} to about \SI{10}{\degree}.
+    \item Repeatability over multiple cycles, hinges, and single-hinge versus assembled.
+    \item Dependence on hinge-pin load (panel mass, spring torque).
+    \item Opening versus closing direction (model assumes pure Coulomb friction).
+    \item Confirm effective moment arm, $\tau_f = F\,r_o$.
+\end{itemize}
+
+\subsection{Hinge Springs}
+\label{sec:spring}
+\begin{itemize}[noitemsep]
+    \item Torque versus angle curve (model assumes $\tau=k\theta$).
+    \item Spring rate $k$ (\si{N.m/rad}) and unit-to-unit variation.
+    \item Preload or offset torque at $\theta=0$ (model assumes none).
+    \item Peak stowed torque $k\theta_0$.
+    \item Hysteresis or set after repeated cycles and long stow.
+\end{itemize}
+
+\subsection{Pressurized Kink Actuator}
+\label{sec:kink}
+\begin{itemize}[noitemsep]
+    \item Kink moment $M_k$ versus fold angle $\beta=2\theta$ and $\Delta P$ (single-kink or blocked-moment test).
+    \item Which closure fits: constant (C1, $M_k=a\Delta P R^3$) or vanishing fold (C2, $\propto\sin2\theta$).
+    \item Empirical constant $a$, from several $\Delta P$ (and $R$ if possible).
+    \item Moment near stow, to check C2's zero at \SI{90}{\degree}.
+    \item Inflated tube radius $R$ versus $\Delta P$ and $\theta$.
+    \item Optional: gas volume $V_g(\theta)$ to verify the volume-deficit model.
+    \item Pressure drop and leakage (hold-pressure test).
+    \item Fold location, wrinkling, and tube-to-link bond behavior.
+\end{itemize}
+
+\subsection{Whole-Array Deployment}
+\label{sec:array}
+\begin{itemize}[noitemsep]
+    \item $\theta(t)$ from stow to $\theta_{min}$: spring-only (Phase 1) and spring plus pressure (Phase 2).
+    \item Whether deployment completes, and the stall angle if not (compare with $\theta_1$).
+    \item $\dot\theta$, $\ddot\theta$ from $\theta(t)$, to check the quasi-static assumption.
+    \item Final angle reached versus $\theta_{min}=\SI{10}{\degree}$; effect of end stops.
+    \item Pressure $P(t)$ logged alongside $\theta(t)$.
+    \item Repeatability over multiple trials and re-stows; torque or force to re-stow.
+\end{itemize}
+
+\subsection{Outward Force and Latch Load}
+\label{sec:force}
+\begin{itemize}[noitemsep]
+    \item Outward end force versus $\theta$ (model: $F=N k\theta/(nL\sin\theta)$, peak at stow).
+    \item Stowed force at several lock points: far end, joint 1, link centre of mass.
+    \item Peak force including dynamic and misalignment effects (scripts assume a $2\times$ placeholder).
+\end{itemize}
+
+\subsection{Geometry and Mass}
+\begin{itemize}[noitemsep]
+    \item Link mass (measured: \SI{40.4}{g}), panel mass, total array mass.
+    \item As-built link length, hinge spacing, hole locations, number of links and springs.
+    \item Centre of mass and, if desired, measured inertia of link and panel.
+\end{itemize}
+
+\subsection{Environment}
+\begin{itemize}[noitemsep]
+    \item Temperature (friction, spring rate, and membrane stiffness vary with it).
+    \item Rig orientation and any gravity offloading (model is zero-g; bench is \SI{1}{g}).
+    \item Shared time base across all channels.
+\end{itemize}
+
+\section{Test Methods}
+
+\subsection{Common Rig Layout}
+
+All tests use a flat base plate (aluminum or MDF) with the scissor array lying in the horizontal
+plane, hinge axes vertical, so gravity acts normal to the motion and drops out of the torque balance.
+The array's weight is carried on ball-transfer casters or PTFE pads. The caster/pad drag is measured
+once (pull the array slowly with a force gauge, no springs fitted) and subtracted. One link end is
+pinned to the plate at a fixed pivot; the far end node is free to travel along the $x$-axis.
+
+Expected bench magnitudes (from \texttt{src/}, \texttt{testingParams.py}): $k\approx\SI{0.025}{N.m/rad}$,
+peak stowed outward force $\approx\SI{0.15}{N}$ at the far end node, hinge friction torque
+$\approx\SI{0.016}{N.m}$ (if $F=\SI{5}{N}$ at $r_o=\SI{3.2}{mm}$). These are small, so instruments must
+resolve about \SI{0.01}{N} and \SI{0.001}{N.m}.
+
+\subsection{Hinge Friction and Spring Torque (single-hinge fixture)}
+
+\textbf{Setup.} One bench link is clamped flat to the base plate. The second link is attached through
+the actual hinge pin, with the real washers and spring. The free link carries a hook at a marked
+radius $r$ (for example \SI{200}{mm} from the pin axis). A digital force gauge (\SIrange{0}{5}{N},
+\SI{0.01}{N} resolution) pulls on that hook with a string, kept perpendicular to the link. A
+protractor scale, or a rotary encoder, sits under the pin to read $\theta$.
+
+\textbf{Procedure.}
+\begin{enumerate}[noitemsep]
+    \item \emph{Friction only:} remove the spring. Pull slowly and steadily through \SIrange{90}{10}{\degree}.
+          The peak before motion starts is breakaway; the steady reading is running friction.
+          Torque is $\tau = F\,r$. Repeat in both directions, 10 cycles, on each hinge.
+    \item \emph{Spring torque:} refit the spring. Load slowly from \SI{10}{\degree} to \SI{90}{\degree}
+          and unload back, logging $F(\theta)$ at every \SI{5}{\degree}.
+    \item The mean of the loading and unloading curves is the spring torque $\tau_s(\theta)$. Half the
+          gap between them is the friction torque, a check on step 1. A straight-line fit gives $k$;
+          the intercept at $\theta=0$ gives preload.
+    \item \emph{Load dependence:} hang dead weights over a pulley, pulling the hinge radially along the
+          link axis, and repeat step 1 to see how friction scales with pin load.
+\end{enumerate}
+
+\subsection{Kink Actuator (single-kink blocked-moment fixture)}
+
+\textbf{Setup.} One kink: two short rigid arms with a pressurized tube segment bonded along both,
+folded at the hinge. Arm A is bolted to the base plate. Arm B's tip presses against a miniature
+compression or S-beam load cell ($\SIrange{0}{5}{N}$) at a known distance $d$ from the fold. The load
+cell is bolted to a rigid post. The post sits on an arc of drilled holes (or a slotted arc) so the fold
+angle $\beta$ can be set and locked at \SI{20}{\degree} steps from \SI{20}{\degree} to \SI{180}{\degree}.
+The load cell is in line with the arm tip, with a spherical or rounded contact tip, so only the
+normal force is read. Then $M_k = F\,d$.
+
+The tube is fed from a regulator through a shut-off valve, with a low-range pressure transducer
+(\SIrange{0}{7}{kPa} gauge, or \SI{1}{psi}) teed into the line at the tube inlet. The valve is closed after filling, so
+$\Delta P$ is held constant while the load cell reads, and any leakage shows as a pressure decay.
+
+\textbf{Procedure.} At each $\beta$, set $\Delta P$ to each of 4 or 5 levels, wait for the force
+reading to settle, then log $F$, $\Delta P$ and tube width. Fit $M_k$ against $\beta$ at constant
+$\Delta P$ to choose between the C1 and C2 closures. Fit $M_k$ against $\Delta P$ at constant $\beta$ to
+get $a$ from $M_k = a\,\Delta P R^3$. Measure $R$ with calipers or a photo at each setting. Run the
+fixture at several tube sizes if hardware allows, to confirm the $R^3$ scaling.
+
+\textbf{Optional volume measurement.} Fill the tube with a calibrated syringe, hold $\Delta P$ constant,
+and record displaced volume as $\beta$ changes; this gives $V_g(\theta)$ directly.
+
+\subsection{Whole-Array Deployment}
+
+\textbf{Setup.} The assembled 2-link array on the base plate, held stowed by the latch or a release pin.
+An overhead camera (fixed, on a tripod above the plate) films the array with contrasting markers
+(ArUco tags or dots) on each hinge and on the far end node. A rotary encoder or low-torque
+potentiometer on one hinge, with a hollow bore through the $1/4$~in pin, is an optional cross-check;
+since it adds friction, it is removed for the friction-sensitive runs. The tube pressure transducer
+is logged by a DAQ (microcontroller or NI), and an LED flash visible to the camera marks a shared time
+zero.
+
+\textbf{Procedure.} Release from stow and film to full deployment or stall, then repeat at least 5
+times. Track marker positions in post-processing to get $\theta(t)$, then smooth and differentiate to
+get $\dot\theta$ and $\ddot\theta$. Compare stall angle, completion, and final angle with the model.
+Run twice: springs only (tube unpressurized), then springs plus pressure. With the bench parameters
+the model predicts a $\sim$\SI{2}{s} deployment, so \SI{60}{fps} or more is needed; the 1 hr and 11 hr
+production timings are not reproduced on the bench, only the torque balance is validated.
+
+\subsection{Outward Force and Latch Load}
+
+\textbf{Setup.} A miniature compression load cell ($\SIrange{0}{5}{N}$, resolution
+$\le\SI{0.01}{N}$) is bolted to a stop plate on a linear rail or slotted track along the $x$-axis of the
+base plate. A rod with a rounded tip is threaded into the load cell and contacts the far end node, with
+the load axis aligned with the deployment direction. The stop plate clamps at positions $x=nL\cos\theta$
+for chosen angles. At each position the array is blocked by the load cell, which reads the outward force
+directly. The load cell mount must be stiff, so the array can't move appreciably under load.
+
+\textbf{Procedure.} For each $\theta$ from \SI{90}{\degree} (stowed, $x=0$) to \SI{10}{\degree}, approach
+the position slowly from the stowed side and from the open side, reading $F$ each time. Friction acts
+in opposite senses for the two approaches, so the pair brackets the frictionless value and gives the
+upper bound the latch must hold. Repeat with the load cell at joint 1 and at a link centre of mass to
+get force against lock location, and compare with $F=N k\theta/(c L\sin\theta)$.
+
+\subsection{Geometry, Mass and Environment}
+
+\begin{itemize}[noitemsep]
+    \item Weigh each link, panel, and the assembled array on a scale (\SI{0.01}{g} resolution).
+    \item Measure link length, hinge spacing and hole positions with calipers.
+    \item Find centre of mass by balancing on a knife edge; optionally get inertia from a bifilar or
+          torsion-pendulum swing test.
+    \item Log room temperature with a thermocouple at the start of each test. If temperature
+          sensitivity matters, repeat key tests in a warm or cold box.
+\end{itemize}
+
+\section{Instrumentation}
+
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+Measurement & Suggested instrument \\
+\midrule
+Hinge angle & Rotary encoder or potentiometer; video tracking as cross-check \\
+Hinge torque & Torque wrench or torque sensor \\
+Outward / re-stow force & Load cell or force gauge \\
+Tube pressure & Pressure transducer \\
+Temperature & Thermocouple \\
+Mass and geometry & Scale, calipers, tape \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section{Test Sequence}
+
+\begin{enumerate}[noitemsep]
+    \item Single-hinge friction.
+    \item Spring torque curve.
+    \item Single-kink moment versus $\Delta P$.
+    \item Spring-only array deployment (Phase 1).
+    \item Spring plus pressure array deployment (Phase 2).
+\end{enumerate}
+Steps 1--3 replace placeholders in \texttt{src/testingParams.py} before the full-array tests.
+
+\end{document}
