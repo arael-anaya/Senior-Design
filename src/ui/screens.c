@@ -486,7 +486,7 @@ void create_screen_data() {
         }
         {
             lv_obj_t *obj = lv_arc_create(parent_obj);
-            lv_obj_set_pos(obj, 105, 96);
+            lv_obj_set_pos(obj, 104, 97);
             lv_obj_set_size(obj, 89, 91);
             lv_arc_set_value(obj, 25);
             lv_obj_set_style_arc_width(obj, 12, LV_PART_MAIN | LV_STATE_DEFAULT);
