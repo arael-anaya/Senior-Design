@@ -13,7 +13,7 @@
 objects_t objects;
 
 static const char *screen_names[] = { "Main", "data" };
-static const char *object_names[] = { "main", "data", "deploy", "force_stop", "depressurize", "home", "graphs", "errors", "obj0", "obj1", "obj2", "obj3", "obj4", "obj5", "obj6", "home_1", "graphs_1", "errors_1", "obj7", "deploy_1", "force_stop_1", "depressurize_1" };
+static const char *object_names[] = { "main", "data", "deploy", "force_stop", "depressurize", "home", "graphs", "errors", "obj0", "obj1", "obj2", "obj3", "obj4", "obj5", "home_1", "graphs_1", "errors_1", "obj6", "deploy_1", "force_stop_1", "depressurize_1" };
 
 //
 // Event handlers
@@ -258,7 +258,7 @@ void create_screen_data() {
         }
         {
             lv_obj_t *obj = lv_arc_create(parent_obj);
-            lv_obj_set_pos(obj, 28, 97);
+            lv_obj_set_pos(obj, 70, 97);
             lv_obj_set_size(obj, 89, 91);
             lv_arc_set_value(obj, 25);
             lv_obj_set_style_arc_width(obj, 12, LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -296,7 +296,7 @@ void create_screen_data() {
         {
             lv_obj_t *obj = lv_label_create(parent_obj);
             objects.obj3 = obj;
-            lv_obj_set_pos(obj, 24, 139);
+            lv_obj_set_pos(obj, 66, 139);
             lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
             add_style_text(obj);
             lv_obj_set_style_text_color(obj, lv_color_hex(0xe0e0e0), LV_PART_MAIN | LV_STATE_DEFAULT);
@@ -306,16 +306,6 @@ void create_screen_data() {
         {
             lv_obj_t *obj = lv_label_create(parent_obj);
             objects.obj4 = obj;
-            lv_obj_set_pos(obj, 102, 139);
-            lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
-            add_style_text(obj);
-            lv_obj_set_style_text_color(obj, lv_color_hex(0xe0e0e0), LV_PART_MAIN | LV_STATE_DEFAULT);
-            lv_obj_set_style_text_font(obj, &lv_font_montserrat_14, LV_PART_MAIN | LV_STATE_DEFAULT);
-            lv_label_set_text_static(obj, "14.7 psi");
-        }
-        {
-            lv_obj_t *obj = lv_label_create(parent_obj);
-            objects.obj5 = obj;
             lv_obj_set_pos(obj, 211, 94);
             lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
             add_style_text(obj);
@@ -325,7 +315,7 @@ void create_screen_data() {
         }
         {
             lv_obj_t *obj = lv_label_create(parent_obj);
-            objects.obj6 = obj;
+            objects.obj5 = obj;
             lv_obj_set_pos(obj, 203, 144);
             lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
             add_style_text(obj);
@@ -405,7 +395,7 @@ void create_screen_data() {
                 lv_obj_t *parent_obj = obj;
                 {
                     lv_obj_t *obj = lv_label_create(parent_obj);
-                    objects.obj7 = obj;
+                    objects.obj6 = obj;
                     lv_obj_set_pos(obj, 0, 0);
                     lv_obj_set_size(obj, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
                     add_style_button(obj);
@@ -483,15 +473,6 @@ void create_screen_data() {
             add_style_text(obj);
             lv_obj_set_style_text_font(obj, &lv_font_montserrat_16, LV_PART_MAIN | LV_STATE_DEFAULT);
             lv_label_set_text_static(obj, "Pressure");
-        }
-        {
-            lv_obj_t *obj = lv_arc_create(parent_obj);
-            lv_obj_set_pos(obj, 104, 97);
-            lv_obj_set_size(obj, 89, 91);
-            lv_arc_set_value(obj, 25);
-            lv_obj_set_style_arc_width(obj, 12, LV_PART_MAIN | LV_STATE_DEFAULT);
-            lv_obj_set_style_transform_scale_x(obj, 128, LV_PART_MAIN | LV_STATE_DEFAULT);
-            lv_obj_set_style_transform_scale_y(obj, 128, LV_PART_MAIN | LV_STATE_DEFAULT);
         }
     }
     
